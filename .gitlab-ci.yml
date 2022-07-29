@@ -11,16 +11,19 @@ variables:
   BUILDVERSION: ${CI_PIPELINE_ID}
   SERVICE_IMAGE: harbor.rnds.pro/rnds/gitlab-janitor
   SERVICE_TAG: ${CI_COMMIT_SHORT_SHA}
+  CURRENT_TAG: ${CI_COMMIT_SHORT_SHA}
 
 # MIXINS
 
 include:
   - project: 'aggredator/support/composer'
     file: '/templates/tagging.yml'
+  - project: 'aggredator/support/composer'
+    file: '/templates/publish-readme-to-harbor.yml'
 
 
 build:
-  image: rnds/ruby:2.5-test
+  image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
   stage: build
   script:
     - SERVICE_TAG=lastest docker-compose pull -q || true
