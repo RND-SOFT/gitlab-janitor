@@ -1,0 +1,21 @@
+version: "2.3"
+
+services:
+  gitlab-janitor:
+    restart: 'unless-stopped'
+    healthcheck:
+      disable: true
+    build:
+      context: .
+      args:
+        RUBY_VERSION: 3.1
+    image: ${SERVICE_IMAGE-rnds/gitlab-janitor}:${SERVICE_TAG-latest}
+    working_dir: /home/app
+    tmpfs: /tmp
+
+
+    
+    
+    
+
+

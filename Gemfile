@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+
+gem 'activesupport', '~> 6.0'
+gem 'docker-api'
+
+
+

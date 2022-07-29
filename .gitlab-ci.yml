@@ -1,0 +1,46 @@
+before_script:
+    - mkdir -p ~/.docker
+    - echo ${RNDS_DOCKER_AUTH} > ~/.docker/config.json
+
+stages:
+  - build
+  - tagging
+  - deploy
+
+variables:
+  BUILDVERSION: ${CI_PIPELINE_ID}
+  SERVICE_IMAGE: docker.rnds.pro/yard-docs
+  SERVICE_TAG: ${CI_COMMIT_SHORT_SHA}
+
+# MIXINS
+
+include:
+  - project: 'aggredator/support/composer'
+    file: '/templates/tagging.yml'
+
+
+build:
+  image: rnds/ruby:2.5-test
+  stage: build
+  script:
+    - SERVICE_TAG=lastest docker-compose pull -q || true
+    - docker-compose build --force-rm --pull
+    - docker-compose push
+
+# TAGGING STAGE
+
+tagging:tags:
+  extends: .tagging_tags
+  variables:
+    IMAGE: ${SERVICE_IMAGE}
+
+tagging:branches:
+  extends: .tagging_branches
+  variables:
+    IMAGE: ${SERVICE_IMAGE}
+
+tagging:master:
+  extends: .tagging_master  
+  variables:
+    IMAGE: ${SERVICE_IMAGE}
+
