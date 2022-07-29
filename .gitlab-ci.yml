@@ -9,7 +9,7 @@ stages:
 
 variables:
   BUILDVERSION: ${CI_PIPELINE_ID}
-  SERVICE_IMAGE: harbor.rnds.pro/gitlab-janitor
+  SERVICE_IMAGE: harbor.rnds.pro/rnds/gitlab-janitor
   SERVICE_TAG: ${CI_COMMIT_SHORT_SHA}
 
 # MIXINS
