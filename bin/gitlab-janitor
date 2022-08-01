@@ -101,12 +101,10 @@ images = GitlabJanitor::ImageCleaner.new(
   deadline: Fugit::Duration.parse(@opts[:image_deadline]).to_sec
 )
 
-images.clean(remove: @opts[:remove])
-exit 1
-
 until $exiting
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
+  images.clean(remove: @opts[:remove])
 
   sleep 3
 end

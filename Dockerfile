@@ -11,8 +11,8 @@ RUN mkdir -p /usr/local/etc \
   } >> /usr/local/etc/gemrc \
   && echo 'gem: --no-document' > ~/.gemrc
 
-# RUN set -ex \
-#   && apk add --no-cache build-base git curl
+RUN set -ex \
+  && apk add --no-cache docker-cli
 
 ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
 ADD lib/gitlab-janitor/version.rb /home/app/lib/gitlab-janitor/
