@@ -14,7 +14,8 @@ RUN mkdir -p /usr/local/etc \
 # RUN set -ex \
 #   && apk add --no-cache build-base git curl
 
-ADD Gemfile Gemfile.lock /home/app/
+ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
+ADD lib/gitlab-janitor/version.rb /home/app/lib/gitlab-janitor/
 
 RUN set -ex \
   && gem install bundler && gem update bundler \
@@ -28,6 +29,6 @@ RUN set -ex \
   && bundle install --jobs=3 \
   && rm -rf /tmp/* /var/tmp/* /usr/src/ruby /root/.gem /usr/local/bundle/cache
 
-CMD ["bundle", "exec", "giltab-janitor"]
+CMD ["bundle", "exec", "bin/gitlab-janitor"]
 
 

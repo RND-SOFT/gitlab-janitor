@@ -25,6 +25,7 @@ Gem::Specification.new 'gitlab-janitor' do |spec|
   spec.add_development_dependency 'simplecov-console'
   spec.add_development_dependency 'awesome_print'
 
+  spec.add_runtime_dependency 'tzinfo-data'
   spec.add_runtime_dependency 'activesupport', '~> 6.0'
   spec.add_runtime_dependency 'docker-api'
   spec.add_runtime_dependency 'fugit'

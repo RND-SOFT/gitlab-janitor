@@ -1,5 +1,9 @@
 # gitlab-janitor
 
+[![Gem Version](https://badge.fury.io/rb/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor)
+[![Gem](https://img.shields.io/gem/dt/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor/versions)
+[![YARD](https://badgen.net/badge/YARD/doc/blue)](http://www.rubydoc.info/gems/gitlab-janitor)
+
 GitLab Janitor is a tool to automatically manage stalled containers when using Docker.
 
 Commain line options and default valuee:
@@ -18,7 +22,6 @@ Usage: gitlab-janitor.rb [options]
         --docker=unix:///var/run/docker.sock
                                      Docker api endpoint. ENV[DOCKER_HOST]
 ```
-
 
 ## Удаление зависших контейнеров
 
@@ -49,4 +52,10 @@ Docker не сохраняет временную метку образа при
 
 ```bash
 REMOVE=true INCLUDE="*integr*, *units*" EXCLUDE="*gitlab*" CONTAINER_DEADLINE="1h10m" VOLUME_DEADLINE="3d" IMAGE_DEADLINE="20d" ./main.rb
+```
+
+## Запуск в докере
+
+```bash
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock rnds/gitlab-janitor:latest
 ```
