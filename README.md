@@ -6,12 +6,41 @@
 
 GitLab Janitor is a tool to automatically manage stalled containers when using Docker.
 
-Commain line options and default valuee:
+## Installation
+
+```sh
+$ gem install gitlab-janitor
+```
+
+If you'd rather install Gitlab Janitor using bundler, add a line for it in your Gemfile (but set the require option to false, as it is a standalone tool):
+
+```sh
+gem 'rubocop', require: false
+```
+
+To install as docker container just pull the image:
+
+
+```sh
+docker pull rnds/gitlab-janitor:latest
+```
+
+## Quickstart
+
+Just type `gitlab-janitor` and watch the magic happen or run in docker:
+
+```sh
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock rnds/gitlab-janitor:latest
+```
+
+## Documentation
+
+Commain line options and default values:
 
 ```bash
-$ ./gitlab-janitor.rb --help
+$ gitlab-janitor --help
 
-Usage: gitlab-janitor.rb [options] 
+Usage: gitlab-janitor [options] 
         --clean-delay=30m            Delay between clean operation ENV[CLEAN_DELAY]
         --include=*units*            <List> Include container for removal. ENV[INCLUDE]
         --exclude=*gitlab*           <List> Exclude container from removal by name. ENV[EXCLUDE]
@@ -23,24 +52,24 @@ Usage: gitlab-janitor.rb [options]
                                      Docker api endpoint. ENV[DOCKER_HOST]
 ```
 
-## Удаление зависших контейнеров
+### Удаление зависших контейнеров
 
 Порядок определения контейнреов для удаления:
 
-- `include=*units*` - в список на удаление включаются контейнеры удовлетворябющие шаблону;
-- `exclude=*gitlab*` - из спсика исключаются контейнеры по шаблону;
+- `include=[*units*]` - в список на удаление включаются контейнеры удовлетворябющие шаблону;
+- `exclude=[*gitlab*]` - из спсика исключаются контейнеры по шаблону;
 - `container-deadline=[1h10m]` - результирующий список проверяется на длительность запуска контенйра;
 
-## Удаление ненужных volumes
+### Удаление ненужных volumes
 
-Порядок определения вольюмов для удалени:
+Порядок определения вольюмов для удаления:
 
 - на удаление попадают только вольюмы, не являющиеся именованными;
 - `volume-deadline=[2d6h]` - результирующий список проверяется на длительность существования вольюма;
 
-## Удаление образов
+### Удаление образов
 
-Docker не сохраняет временную метку образа при скачивании (pull), там образом используя средства Docker API невозможно понять как давно образ был скачан и когда его поря удалять. Для решения этой задачи сервис сохраняет информацию о скачанных образах, отслеживая там образом интервалы устаревания.
+Docker не сохраняет временную метку образа при скачивании (pull), таким образом используя средства Docker API невозможно понять как давно образ был скачан и когда его пора удалять. Для решения этой задачи сервис сохраняет информацию о скачанных образах, отслеживая таким образом интервалы устаревания.
 
 Порядок определения образов для удалени:
 
@@ -48,14 +77,24 @@ Docker не сохраняет временную метку образа при
 - `image-deadline=[20d]` - результирующий список проверяется на длительность существования образа;
 
 
-## Пример запуска
+## Examples
+
+Production ready config:
 
 ```bash
-REMOVE=true INCLUDE="*integr*, *units*" EXCLUDE="*gitlab*" CONTAINER_DEADLINE="1h10m" VOLUME_DEADLINE="3d" IMAGE_DEADLINE="20d" ./main.rb
+REMOVE=true INCLUDE="*integr*, *units*" EXCLUDE="*gitlab*" CONTAINER_DEADLINE="1h10m" VOLUME_DEADLINE="3d" IMAGE_DEADLINE="20d" gitlab-janitor
 ```
 
 ## Запуск в докере
 
 ```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock rnds/gitlab-janitor:latest
+docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e REMOVE=true \
+  -e INCLUDE="*integr*, *units*" \
+  -e EXCLUDE="*gitlab*" \
+  -e CONTAINER_DEADLINE="1h10m" \
+  -e VOLUME_DEADLINE="3d" \
+  -e IMAGE_DEADLINE="20d" \
+  rnds/gitlab-janitor:latest
 ```
