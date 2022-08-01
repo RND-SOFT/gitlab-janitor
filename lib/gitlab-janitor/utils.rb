@@ -1,9 +1,11 @@
 module GitlabJanitor
 
-  class Fmt < ActiveSupport::Logger::SimpleFormatter       
+  class Fmt < ActiveSupport::Logger::SimpleFormatter
+
     def call(severity, timestamp, progname, msg)
       super
     end
+
   end
 
   class Util
@@ -34,7 +36,7 @@ module GitlabJanitor
         formatter.extend ActiveSupport::TaggedLogging::Formatter
         $logger.formatter = formatter
 
-         
+
 
         initialize_signal_handlers
 
@@ -42,6 +44,7 @@ module GitlabJanitor
           def to_bool
             return true   if self == true   || self =~ (/(true|t|yes|y|1)$/i)
             return false  if self == false  || self.blank? || self =~ (/(false|f|no|n|0)$/i)
+
             raise ArgumentError.new("invalid value for Boolean: \"#{self}\"")
           end
         end
@@ -52,8 +55,8 @@ module GitlabJanitor
           trap(sig) do |*_args|
             TERM_SIGNALS.each do |sig|
               trap(sig) do |*_args|
-                STDERR.puts 'Forcing exit!'
-                Kernel::exit!(1)
+                warn 'Forcing exit!'
+                Kernel.exit!(1)
               end
             end
 
@@ -66,4 +69,6 @@ module GitlabJanitor
     end
 
   end
+
 end
+

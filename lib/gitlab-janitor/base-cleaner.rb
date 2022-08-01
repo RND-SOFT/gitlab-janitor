@@ -2,7 +2,9 @@ module GitlabJanitor
   class BaseCleaner
 
     class Model
+
       attr_reader :model
+
       def initialize(m)
         @model = m
       end
@@ -20,23 +22,26 @@ module GitlabJanitor
       def respond_to_missing?(method_name, include_private = false)
         model.send(:respond_to_missing?, method_name, include_private) || super
       end
+
     end
 
     attr_reader :delay, :deadline, :logger
 
-    def initialize delay: 10, deadline: 1.second, logger: GitlabJanitor::Util::logger, **args
+    def initialize(delay: 10, deadline: 1.second, logger: GitlabJanitor::Util.logger, **_args)
       @delay = delay
       @deadline = deadline
       @logger = logger.tagged(self.class.to_s)
     end
 
     def clean(remove: false)
-      return nil if @cleaned_at && (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @cleaned_at) < @delay.seconds
+      if @cleaned_at && (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @cleaned_at) < @delay.seconds
+        return nil
+      end
 
       do_clean(remove: remove)
 
       @cleaned_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      return true
+      true
     end
 
     def log_exception(text)
@@ -48,3 +53,4 @@ module GitlabJanitor
 
   end
 end
+

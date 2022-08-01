@@ -1,17 +1,17 @@
 #!/usr/bin/env ruby
 
-#cwd = __dir__
-#$root = "#{cwd}/"
-#$: << $root
+# cwd = __dir__
+# $root = "#{cwd}/"
+# $: << $root
 
-#lib = File.expand_path('lib', __dir__)
-#$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+# lib = File.expand_path('lib', __dir__)
+# $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 
-#require 'rubygems'
-#require 'bundler'
-#require 'bundler/setup'
-#Bundler.require(:default)
+# require 'rubygems'
+# require 'bundler'
+# require 'bundler/setup'
+# Bundler.require(:default)
 
 require 'active_support/all'
 require 'docker-api'
@@ -38,67 +38,76 @@ GitlabJanitor::Util.setup
 parser = OptionParser.new do |o|
   o.banner = "Usage: #{UTIL} [options] "
 
-  o.on("--clean-delay=#{@opts[:clean_delay]}", 'Delay between clean operation ENV[CLEAN_DELAY]') do |pattern|
+  o.on("--clean-delay=#{@opts[:clean_delay]}",
+       'Delay between clean operation ENV[CLEAN_DELAY]') do |pattern|
     @opts[:clean_delay] = pattern.strip
   end
 
-  o.on("--include=#{@opts[:includes].join(',')}", '<List> Include container for removal. ENV[INCLUDE]') do |pattern|
+  o.on("--include=#{@opts[:includes].join(',')}",
+       '<List> Include container for removal. ENV[INCLUDE]') do |pattern|
     @opts[:includes] += pattern.split(/[,;]/)
   end
 
-  o.on("--exclude=#{@opts[:excludes].join(',')}", '<List> Exclude container from removal by name. ENV[EXCLUDE]') do |pattern|
+  o.on("--exclude=#{@opts[:excludes].join(',')}",
+       '<List> Exclude container from removal by name. ENV[EXCLUDE]') do |pattern|
     @opts[:excludes] += pattern.split(/[,;]/)
   end
 
-  o.on("--container-deadline=#{@opts[:container_deadline]}", 'Maximum container run duration. ENV[CONTAINER_DEADLINE]') do |pattern|
+  o.on("--container-deadline=#{@opts[:container_deadline]}",
+       'Maximum container run duration. ENV[CONTAINER_DEADLINE]') do |pattern|
     @opts[:container_deadline] = pattern.strip
   end
 
-  o.on("--volume-deadline=#{@opts[:volume_deadline]}", 'Maximum volume life dudation. ENV[VOLUME_DEADLINE]') do |pattern|
+  o.on("--volume-deadline=#{@opts[:volume_deadline]}",
+       'Maximum volume life dudation. ENV[VOLUME_DEADLINE]') do |pattern|
     @opts[:volume_deadline] = pattern.strip
   end
 
-  o.on("--image-deadline=#{@opts[:image_deadline]}", 'Maximum image life duration. ENV[IMAGE_DEADLINE]') do |pattern|
+  o.on("--image-deadline=#{@opts[:image_deadline]}",
+       'Maximum image life duration. ENV[IMAGE_DEADLINE]') do |pattern|
     @opts[:image_deadline] = pattern.strip
   end
 
-  o.on("--remove", 'Real remove instead of dry run. ENV[REMOVE]') do |value|
+  o.on('--remove', 'Real remove instead of dry run. ENV[REMOVE]') do |value|
     @opts[:remove] = value.strip.to_bool
   end
 
-  o.on("--docker=#{@opts[:docker_host]}", 'Docker api endpoint. ENV[DOCKER_HOST]') do |url|
+  o.on("--docker=#{@opts[:docker_host]}", 'Docker api endpoint. ENV[DOCKER_HOST]') do |_url|
     @opts[:docker_host] = value.strip
   end
-
 end
 parser.parse!
 
 Docker.url = @opts[:docker_host]
 
-GitlabJanitor::Util::logger.debug do
+GitlabJanitor::Util.logger.debug do
   "Config: #{JSON.pretty_generate(@opts)}"
 end
 
 containers = GitlabJanitor::ContainerCleaner.new(
-  delay: Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
+  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   includes: @opts[:includes],
   excludes: @opts[:excludes],
   deadline: Fugit::Duration.parse(@opts[:container_deadline]).to_sec
 )
 
 volumes = GitlabJanitor::VolumeCleaner.new(
-  delay: Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
+  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   deadline: Fugit::Duration.parse(@opts[:volume_deadline]).to_sec
 )
 
+images = GitlabJanitor::ImageCleaner.new(
+  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
+  deadline: Fugit::Duration.parse(@opts[:image_deadline]).to_sec
+)
 
-while !$exiting do
+images.clean(remove: @opts[:remove])
+exit 1
+
+until $exiting
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
 
   sleep 3
 end
-
-
-
 

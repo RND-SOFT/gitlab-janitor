@@ -3,7 +3,7 @@ AllCops:
   Exclude:
     - "storage/**/*"
 
-Layout/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   Enabled: true
   AutoCorrect: true
   EnforcedStyle: final_blank_line
@@ -32,7 +32,7 @@ Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
   AutoCorrect: true
 
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedColonStyle: table
   EnforcedHashRocketStyle: table
 
@@ -106,8 +106,6 @@ Style/RaiseArgs:
 Style/SpecialGlobalVars:
   Enabled: false
 
-Style/BracesAroundHashParameters:
-  EnforcedStyle: context_dependent
 
 Style/NumericPredicate:
   Enabled: false
