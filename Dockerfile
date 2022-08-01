@@ -28,6 +28,6 @@ RUN set -ex \
   && bundle install --jobs=3 \
   && rm -rf /tmp/* /var/tmp/* /usr/src/ruby /root/.gem /usr/local/bundle/cache
 
-CMD ["bundle", "exec", "ruby", "/home/app/main.rb"]
+CMD ["bundle", "exec", "giltab-janitor"]
 
 

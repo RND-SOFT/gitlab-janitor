@@ -1,6 +1,6 @@
 before_script:
     - mkdir -p ~/.docker
-    - echo ${HARBOR_DOCKER_AUTH} > ~/.docker/config.json
+    - echo ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
 
 stages:
   - build
