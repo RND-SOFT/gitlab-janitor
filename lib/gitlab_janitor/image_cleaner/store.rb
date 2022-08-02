@@ -13,7 +13,7 @@ module GitlabJanitor
 
       def parse_images
         Docker::Image.all.map do |m|
-          tags = m.info.fetch('RepoTags', [])
+          tags = m.info.fetch('RepoTags', []) || []
           tags = [m.info['id']] if tags.empty? || tags.first == '<none>:<none>'
           m.info['RepoTags'] = tags
 
