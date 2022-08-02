@@ -122,6 +122,8 @@ images = GitlabJanitor::ImageCleaner.new(
 )
 
 until GitlabJanitor::Util.exiting?
+  File.write('/tmp/service.pid', Process.pid)
+
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
   images.clean(remove: @opts[:remove])
