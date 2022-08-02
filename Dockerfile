@@ -14,19 +14,23 @@ RUN mkdir -p /usr/local/etc \
 RUN set -ex \
   && apk add --no-cache docker-cli
 
+
 ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
 ADD lib/gitlab_janitor/version.rb /home/app/lib/gitlab_janitor/
 
 RUN set -ex \
   && gem install bundler && gem update bundler \
   && bundle config set --local system 'true' \
+  && bundle config set --local without 'development' \
   && bundle install --jobs=3 \
+  && bundle clean --force \
   && rm -rf /tmp/* /var/tmp/* /usr/src/ruby /root/.gem /usr/local/bundle/cache
 
 ADD . /home/app/
 
 RUN set -ex \
   && bundle install --jobs=3 \
+  && bundle clean --force \
   && rm -rf /tmp/* /var/tmp/* /usr/src/ruby /root/.gem /usr/local/bundle/cache
 
 CMD ["bundle", "exec", "bin/gitlab-janitor"]
