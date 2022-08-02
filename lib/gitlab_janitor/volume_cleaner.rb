@@ -31,6 +31,13 @@ module GitlabJanitor
 
     end
 
+    attr_reader :includes
+
+    def initialize(includes: [''], **kwargs)
+      super(**kwargs)
+      @includes = includes
+    end
+
     def do_clean(remove: false)
       to_remove, keep = prepare(Docker::Volume.all.map{|m| Model.new(m) })
 
@@ -41,6 +48,8 @@ module GitlabJanitor
       if remove
         logger.info 'Removing volumes...'
         to_remove.each do |model|
+          return false if exiting?
+
           logger.tagged(model.name.first(10)) do
             logger.debug '   Removing...'
             log_exception('Remove') { model.remove }
@@ -61,6 +70,14 @@ module GitlabJanitor
       end
       @logger.info("Selected volumes: \n#{to_remove.map{|c| "  + #{format_item(c)}" }.join("\n")}")
 
+      @logger.debug("Selecting volumes by includes #{@includes}...")
+      to_remove += select_by_name(volumes)
+      if to_remove.empty?
+        @logger.info('Noting to remove.')
+        return [], images
+      end
+      @logger.info("Selected volumes: \n#{to_remove.map{|c| "  + #{format_item(c)}" }.join("\n")}")
+
       @logger.debug("Filtering volumes by deadline: older than #{@deadline} seconds...")
       to_remove = select_by_deadline(to_remove)
       if to_remove.empty?
@@ -76,6 +93,14 @@ module GitlabJanitor
       "#{Time.parse(model.created_at)} Age:#{model.age_text.ljust(13)} #{model.name.first(10).ljust(10)} #{model.mountpoint}"
     end
 
+    def select_by_name(volumes)
+      volumes.select do |model|
+        @includes.any? do |pattern|
+          File.fnmatch(pattern, model.name)
+        end
+      end
+    end
+
     SHA_RX = /^[a-zA-Z0-9]{64}$/.freeze
 
     def select_unnamed(volumes)
@@ -84,8 +109,8 @@ module GitlabJanitor
       end
     end
 
-    def select_by_deadline(containers)
-      containers.select do |model|
+    def select_by_deadline(volumes)
+      volumes.select do |model|
         model.age > deadline
       end
     end

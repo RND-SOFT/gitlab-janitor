@@ -39,15 +39,17 @@ module GitlabJanitor
 
     require_relative 'image_cleaner/store'
 
-    def initialize(**kwargs)
-      super
-      @store = Store.new(logger: logger)
+    attr_reader :store
+
+    def initialize(image_store:, **kwargs)
+      super(**kwargs)
+      @store = Store.new(filename: image_store, logger: logger)
     end
 
     def do_clean(remove: false)
-      @store.load
-      to_remove, keep = prepare(@store.parse_images)
-      @store.save(skip_older: Time.now - @deadline)
+      store.load
+      to_remove, keep = prepare(store.parse_images)
+      store.save(skip_older: Time.now - @deadline)
 
       return if to_remove.empty?
 
@@ -55,10 +57,12 @@ module GitlabJanitor
 
       if remove
         logger.info 'Removing images...'
-        to_remove.each do |c|
-          logger.tagged(c.name) do
+        to_remove.each do |model|
+          return false if exiting?
+
+          logger.tagged(model.name) do
             logger.debug '   Removing...'
-            log_exception('Remove') { `docker rmi #{c.name}` }
+            log_exception('Remove') { `docker rmi #{model.name}` }
             logger.debug '   Removing COMPLETED'
           end
         end
@@ -69,6 +73,7 @@ module GitlabJanitor
 
     def prepare(images)
       to_remove = images
+
       @logger.info("Selected images: \n#{to_remove.map{|c| "  + #{format_item(c)}" }.join("\n")}")
 
       @logger.debug("Filtering images by deadline: older than #{Fugit::Duration.parse(@deadline).deflate.to_plain_s}...")
@@ -86,8 +91,8 @@ module GitlabJanitor
       "#{model.loaded_at} Age:#{model.age_text.ljust(13)} #{model.name.first(60).ljust(60)}"
     end
 
-    def select_by_deadline(containers)
-      containers.select do |model|
+    def select_by_deadline(images)
+      images.select do |model|
         model.age > deadline
       end
     end

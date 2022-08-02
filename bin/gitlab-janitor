@@ -28,9 +28,12 @@ GitlabJanitor::Util.setup
   excludes:           [ENV.fetch('EXCLUDE', '*gitlab*')],
   clean_delay:        ENV.fetch('CLEAN_DELAY', '30m'),
   container_deadline: ENV.fetch('CONTAINER_DEADLINE', '1h10m'),
+  volume_includes:    [ENV.fetch('IMAGE_INCLUDE', 'runner*cache*')],
   volume_deadline:    ENV.fetch('VOLUME_DEADLINE', '2d6h'),
   image_deadline:     ENV.fetch('IMAGE_DEADLINE', '20d'),
+  image_store:        ENV.fetch('IMAGE_STORE', './images.txt'),
   remove:             ENV.fetch('REMOVE', 'false').to_bool,
+  log_level:          ENV.fetch('LOG_LEVEL', ::Logger::INFO),
   docker_host:        ENV.fetch('DOCKER_HOST', 'unix:///var/run/docker.sock')
 }
 
@@ -38,69 +41,87 @@ parser = OptionParser.new do |o|
   o.banner = "Usage: #{UTIL} [options] "
 
   o.on("--clean-delay=#{@opts[:clean_delay]}",
-       'Delay between clean operation ENV[CLEAN_DELAY]') do |pattern|
+       'ENV[CLEAN_DELAY]'.ljust(25) + 'Delay between clean operation.') do |pattern|
     @opts[:clean_delay] = pattern.strip
   end
 
   o.on("--include=#{@opts[:includes].join(',')}",
-       '<List> Include container for removal. ENV[INCLUDE]') do |pattern|
+       'ENV[INCLUDE]'.ljust(25) + '<List> Include container for removal.') do |pattern|
     @opts[:includes] += pattern.split(/[,;]/)
   end
 
   o.on("--exclude=#{@opts[:excludes].join(',')}",
-       '<List> Exclude container from removal by name. ENV[EXCLUDE]') do |pattern|
+       'ENV[EXCLUDE]'.ljust(25) + '<List> Exclude container from removal by name.') do |pattern|
     @opts[:excludes] += pattern.split(/[,;]/)
   end
 
   o.on("--container-deadline=#{@opts[:container_deadline]}",
-       'Maximum container run duration. ENV[CONTAINER_DEADLINE]') do |pattern|
+       'ENV[CONTAINER_DEADLINE]'.ljust(25) + 'Maximum container run duration.') do |pattern|
     @opts[:container_deadline] = pattern.strip
   end
 
+  o.on("--volume-include=#{@opts[:volume_includes].join(',')}",
+       'ENV[VOLUME_INCLUDE]'.ljust(25) + '<List> Include volumes for removal.') do |pattern|
+    @opts[:volume_includes] += pattern.split(/[,;]/)
+  end
+
   o.on("--volume-deadline=#{@opts[:volume_deadline]}",
-       'Maximum volume life dudation. ENV[VOLUME_DEADLINE]') do |pattern|
+       'ENV[VOLUME_DEADLINE]'.ljust(25) + 'Maximum volume life duration.') do |pattern|
     @opts[:volume_deadline] = pattern.strip
   end
 
   o.on("--image-deadline=#{@opts[:image_deadline]}",
-       'Maximum image life duration. ENV[IMAGE_DEADLINE]') do |pattern|
+       'ENV[IMAGE_DEADLINE]'.ljust(25) + 'Maximum image life duration.') do |pattern|
     @opts[:image_deadline] = pattern.strip
   end
 
-  o.on('--remove', 'Real remove instead of dry run. ENV[REMOVE]') do |value|
+  o.on("--image-store=#{@opts[:image_store]}",
+       'ENV[IMAGE_STORE]'.ljust(25) + 'File to store images timestamps.') do |pattern|
+    @opts[:image_store] = pattern.strip
+  end
+
+  o.on('--remove', 'ENV[REMOVE]'.ljust(25) + 'Real remove instead of dry run.') do |value|
     @opts[:remove] = value.strip.to_bool
   end
 
-  o.on("--docker=#{@opts[:docker_host]}", 'Docker api endpoint. ENV[DOCKER_HOST]') do |_url|
+  o.on("--docker=#{@opts[:docker_host]}", 'ENV[DOCKER_HOST]'.ljust(25) + 'Docker api endpoint.') do |_url|
     @opts[:docker_host] = value.strip
+  end
+
+  o.on('--debug', 'ENV[LOG_LEVEL]'.ljust(25) + 'Verbose logs. ENV values: debug, info, warn, error') do
+    @opts[:log_level] = ::Logger::DEBUG
   end
 end
 parser.parse!
 
 Docker.url = @opts[:docker_host]
 
+GitlabJanitor::Util.logger.level = @opts[:log_level]
+
 GitlabJanitor::Util.logger.debug do
   "Config: #{JSON.pretty_generate(@opts)}"
 end
 
 containers = GitlabJanitor::ContainerCleaner.new(
-  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   includes: @opts[:includes],
   excludes: @opts[:excludes],
+  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   deadline: Fugit::Duration.parse(@opts[:container_deadline]).to_sec
 )
 
 volumes = GitlabJanitor::VolumeCleaner.new(
+  includes: @opts[:volume_includes],
   delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   deadline: Fugit::Duration.parse(@opts[:volume_deadline]).to_sec
 )
 
 images = GitlabJanitor::ImageCleaner.new(
-  delay:    Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
-  deadline: Fugit::Duration.parse(@opts[:image_deadline]).to_sec
+  image_store: File.expand_path(@opts[:image_store]),
+  delay:       Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
+  deadline:    Fugit::Duration.parse(@opts[:image_deadline]).to_sec
 )
 
-until GitlabJanitor.exiting?
+until GitlabJanitor::Util.exiting?
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
   images.clean(remove: @opts[:remove])

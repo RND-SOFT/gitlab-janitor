@@ -6,6 +6,13 @@
 
 GitLab Janitor is a tool to automatically manage stalled containers when using Docker.
 
+Features
+
+- Remove dangling containers
+- Remove unused anonymous volumes
+- Remove unused images
+- Track image usage timestamp 
+
 ## Installation
 
 ```sh
@@ -41,15 +48,18 @@ Commain line options and default values:
 $ gitlab-janitor --help
 
 Usage: gitlab-janitor [options] 
-        --clean-delay=30m            Delay between clean operation ENV[CLEAN_DELAY]
-        --include=*units*            <List> Include container for removal. ENV[INCLUDE]
-        --exclude=*gitlab*           <List> Exclude container from removal by name. ENV[EXCLUDE]
-        --container-deadline=1s      Maximum container run duration. ENV[CONTAINER_DEADLINE]
-        --volume-deadline=2d6h       Maximum volume life dudation. ENV[VOLUME_DEADLINE]
-        --image-deadline=20d         Maximum image life duration. ENV[IMAGE_DEADLINE]
-        --remove                     Real remove instead of dry run. ENV[REMOVE]
+        --clean-delay=30m            ENV[CLEAN_DELAY]         Delay between clean operation.
+        --include=*units*            ENV[INCLUDE]             <List> Include container for removal.
+        --exclude=*gitlab*           ENV[EXCLUDE]             <List> Exclude container from removal by name.
+        --container-deadline=1h10m   ENV[CONTAINER_DEADLINE]  Maximum container run duration.
+        --volume-deadline=2d6h       ENV[VOLUME_DEADLINE]     Maximum volume life dudation.
+        --image-deadline=20d         ENV[IMAGE_DEADLINE]      Maximum image life duration.
+        --image-store=./images.txt   ENV[IMAGE_STORE]         File to store images timestamps.
+        --remove                     ENV[REMOVE]              Real remove instead of dry run.
         --docker=unix:///var/run/docker.sock
-                                     Docker api endpoint. ENV[DOCKER_HOST]
+                                     ENV[DOCKER_HOST]         Docker api endpoint.
+        --debug                      ENV[LOG_LEVEL]           Verbose logs. ENV values: debug, info, warn, error
+
 ```
 
 ### Удаление зависших контейнеров
@@ -73,9 +83,10 @@ Docker не сохраняет временную метку образа при
 
 Порядок определения образов для удалени:
 
-- на удаление попадают только образы, не имеющие тэг `latest`;
+- При первой встрече нового образа врменная метка сохраняется в локальное хранилище (файл)
+- При достижении лимита хранения образ удаляется
+- При обнаружении запущеннго контейнера временная метка для соответствующего образа обнуляется
 - `image-deadline=[20d]` - результирующий список проверяется на длительность существования образа;
-
 
 ## Examples
 

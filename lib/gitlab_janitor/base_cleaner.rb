@@ -42,6 +42,10 @@ module GitlabJanitor
       true
     end
 
+    def exiting?
+      GitlabJanitor::Util.exiting?
+    end
+
     def log_exception(text)
       yield
     rescue StandardError => e

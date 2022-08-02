@@ -29,8 +29,8 @@ module GitlabJanitor
 
     attr_reader :excludes, :includes
 
-    def initialize(includes: [''], excludes: [''], **args)
-      super(**args)
+    def initialize(includes: [''], excludes: [''], **kwargs)
+      super(**kwargs)
       @includes = includes
       @excludes = excludes
       @deadline = deadline
@@ -45,12 +45,14 @@ module GitlabJanitor
 
       if remove
         logger.info 'Removing containers...'
-        to_remove.each do |c|
-          logger.tagged(c.name) do
+        to_remove.each do |model|
+          return false if exiting?
+
+          logger.tagged(model.name) do
             logger.debug '   Removing...'
-            log_exception('Stop') { c.stop }
-            log_exception('Wait') { c.wait(15) }
-            log_exception('Remove') { c.remove }
+            log_exception('Stop') { model.stop }
+            log_exception('Wait') { model.wait(15) }
+            log_exception('Remove') { model.remove }
             logger.debug '   Removing COMPLETED'
           end
         end
