@@ -54,10 +54,9 @@ tagging:master:
 
 tagging:version:
   extends: .tagging
-  before_script:
-    - env
-    - echo $TAG
-    - cat version.env || true
+  variables:
+    IMAGE: ${SERVICE_IMAGE}
+    #TAG loaded from dotenv version.env
   only:
     - master    
 
