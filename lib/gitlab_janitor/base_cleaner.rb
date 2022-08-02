@@ -5,8 +5,8 @@ module GitlabJanitor
 
       attr_reader :model
 
-      def initialize(m)
-        @model = m
+      def initialize(model)
+        @model = model
       end
 
       def method_missing(method, *args, &block)
@@ -34,9 +34,7 @@ module GitlabJanitor
     end
 
     def clean(remove: false)
-      if @cleaned_at && (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @cleaned_at) < @delay.seconds
-        return nil
-      end
+      return nil if @cleaned_at && (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @cleaned_at) < @delay.seconds
 
       do_clean(remove: remove)
 

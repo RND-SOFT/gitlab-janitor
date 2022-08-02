@@ -3,8 +3,8 @@ module GitlabJanitor
 
     class Model < BaseCleaner::Model
 
-      def initialize(v)
-        super(v)
+      def initialize(model)
+        super(model)
 
         info['_Age'] = (Time.now - Time.at(created_at)).round(0)
       end
@@ -14,11 +14,15 @@ module GitlabJanitor
       end
 
       def name
-        @anme ||= info['Names'].first.sub(%r{^/}, '')
+        @name ||= info['Names'].first.sub(%r{^/}, '')
       end
 
       def age
         info['_Age']
+      end
+
+      def age_text
+        Fugit::Duration.parse(age).deflate.to_plain_s
       end
 
     end
@@ -35,25 +39,23 @@ module GitlabJanitor
     def do_clean(remove: false)
       to_remove, keep = prepare(Docker::Container.all(all: true).map{|m| Model.new(m) })
 
-      unless to_remove.empty?
-        keep.each do |c|
-          logger.debug("  KEEP #{c.name}")
-        end
+      return if to_remove.empty?
 
-        if remove
-          logger.info 'Removing containers...'
-          to_remove.each do |c|
-            logger.tagged(c.name) do
-              logger.debug '   Removing...'
-              log_exception('Stop') { c.stop }
-              log_exception('Wait') { c.wait(15) }
-              log_exception('Remove') { c.remove }
-              logger.debug '   Removing COMPLETED'
-            end
+      keep.each {|m| logger.debug("  KEEP #{m.name}") }
+
+      if remove
+        logger.info 'Removing containers...'
+        to_remove.each do |c|
+          logger.tagged(c.name) do
+            logger.debug '   Removing...'
+            log_exception('Stop') { c.stop }
+            log_exception('Wait') { c.wait(15) }
+            log_exception('Remove') { c.remove }
+            logger.debug '   Removing COMPLETED'
           end
-        else
-          logger.info 'Skip removal due to dry run'
         end
+      else
+        logger.info 'Skip removal due to dry run'
       end
     end
 
@@ -85,29 +87,29 @@ module GitlabJanitor
       [to_remove, containers - to_remove]
     end
 
-    def format_item(c)
-      "#{Time.at(c.created_at)} Age:#{Fugit::Duration.parse(c.age).deflate.to_plain_s.ljust(10)} #{c.name.first(60).ljust(60)}"
+    def format_item(model)
+      "#{Time.at(model.created_at)} Age:#{model.age_text.ljust(10)} #{model.name.first(60).ljust(60)}"
     end
 
     def select_by_name(containers)
-      containers.select do |c|
+      containers.select do |model|
         @includes.any? do |pattern|
-          File.fnmatch(pattern, c.name)
+          File.fnmatch(pattern, model.name)
         end
       end
     end
 
     def reject_by_name(containers)
-      containers.reject do |c|
+      containers.reject do |model|
         @excludes.any? do |pattern|
-          File.fnmatch(pattern, c.name)
+          File.fnmatch(pattern, model.name)
         end
       end
     end
 
     def select_by_deadline(containers)
-      containers.select do |c|
-        c.age > deadline
+      containers.select do |model|
+        model.age > deadline
       end
     end
 

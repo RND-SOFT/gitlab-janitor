@@ -3,8 +3,8 @@ module GitlabJanitor
 
     class Model < BaseCleaner::Model
 
-      def initialize(v)
-        super(v)
+      def initialize(model)
+        super(model)
 
         info['_Age'] = (Time.now - Time.parse(created_at)).round(0)
       end
@@ -21,6 +21,10 @@ module GitlabJanitor
         info['_Age']
       end
 
+      def age_text
+        Fugit::Duration.parse(age).deflate.to_plain_s
+      end
+
       def mountpoint
         info['Mountpoint']
       end
@@ -30,22 +34,21 @@ module GitlabJanitor
     def do_clean(remove: false)
       to_remove, keep = prepare(Docker::Volume.all.map{|m| Model.new(m) })
 
-      unless to_remove.empty?
-        keep.each do |c|
-          logger.debug("  KEEP #{c.name}")
-        end
-        if remove
-          logger.info 'Removing volumes...'
-          to_remove.each do |c|
-            logger.tagged(c.name.first(10)) do
-              logger.debug '   Removing...'
-              log_exception('Remove') { c.remove }
-              logger.debug '   Removing COMPLETED'
-            end
+      return if to_remove.empty?
+
+      keep.each {|m| logger.debug("  KEEP #{m.name}") }
+
+      if remove
+        logger.info 'Removing volumes...'
+        to_remove.each do |model|
+          logger.tagged(model.name.first(10)) do
+            logger.debug '   Removing...'
+            log_exception('Remove') { model.remove }
+            logger.debug '   Removing COMPLETED'
           end
-        else
-          logger.info 'Skip removal due to dry run'
         end
+      else
+        logger.info 'Skip removal due to dry run'
       end
     end
 
@@ -69,21 +72,21 @@ module GitlabJanitor
       [to_remove, (volumes - to_remove)]
     end
 
-    def format_item(c)
-      "#{Time.parse(c.created_at)} Age:#{Fugit::Duration.parse(c.age).deflate.to_plain_s.ljust(13)} #{c.name.first(10).ljust(10)} #{c.mountpoint}"
+    def format_item(model)
+      "#{Time.parse(model.created_at)} Age:#{model.age_text.ljust(13)} #{model.name.first(10).ljust(10)} #{model.mountpoint}"
     end
 
-    SHA_RX = /^[a-zA-Z0-9]{64}$/
+    SHA_RX = /^[a-zA-Z0-9]{64}$/.freeze
 
     def select_unnamed(volumes)
-      volumes.select do |c|
-        SHA_RX.match(c.name)
+      volumes.select do |model|
+        SHA_RX.match(model.name)
       end
     end
 
     def select_by_deadline(containers)
-      containers.select do |c|
-        c.age > deadline
+      containers.select do |model|
+        model.age > deadline
       end
     end
 

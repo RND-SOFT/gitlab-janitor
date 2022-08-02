@@ -2,7 +2,7 @@ lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 # Maintain your gem's version:
-require 'gitlab-janitor/version'
+require 'gitlab_janitor/version'
 
 Gem::Specification.new 'gitlab-janitor' do |spec|
   spec.version       = ENV['BUILDVERSION'].to_i > 0 ? "#{Lusnoc::VERSION}.#{ENV['BUILDVERSION'].to_i}" : GitlabJanitor::VERSION

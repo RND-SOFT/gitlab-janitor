@@ -1,13 +1,7 @@
+require 'logger'
+require 'active_support/all'
+
 module GitlabJanitor
-
-  class Fmt < ActiveSupport::Logger::SimpleFormatter
-
-    def call(severity, timestamp, progname, msg)
-      super
-    end
-
-  end
-
   class Util
 
     TERM_SIGNALS = %w[INT TERM].freeze
@@ -23,20 +17,17 @@ module GitlabJanitor
       end
 
       def logger
-        $logger
+        $logger ||= ActiveSupport::TaggedLogging.new(Logger.new(STDOUT)).tap do |logger|
+          logger.level = ENV.fetch('LOG_LEVEL', Logger::INFO)
+          formatter = Logger::Formatter.new
+          formatter.extend ActiveSupport::TaggedLogging::Formatter
+          logger.formatter = formatter
+        end
       end
 
       def setup
         STDOUT.sync = true
         STDERR.sync = true
-
-        $logger = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
-        $logger.level = ENV.fetch('LOG_LEVEL', Logger::INFO)
-        formatter = Logger::Formatter.new
-        formatter.extend ActiveSupport::TaggedLogging::Formatter
-        $logger.formatter = formatter
-
-
 
         initialize_signal_handlers
 
@@ -53,8 +44,8 @@ module GitlabJanitor
       def initialize_signal_handlers
         TERM_SIGNALS.each do |sig|
           trap(sig) do |*_args|
-            TERM_SIGNALS.each do |sig|
-              trap(sig) do |*_args|
+            TERM_SIGNALS.each do |s|
+              trap(s) do |*_args|
                 warn 'Forcing exit!'
                 Kernel.exit!(1)
               end
@@ -69,6 +60,5 @@ module GitlabJanitor
     end
 
   end
-
 end
 

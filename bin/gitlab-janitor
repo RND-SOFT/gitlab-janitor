@@ -13,7 +13,6 @@
 # require 'bundler/setup'
 # Bundler.require(:default)
 
-require 'active_support/all'
 require 'docker-api'
 require 'fugit'
 require 'optparse'
@@ -101,7 +100,7 @@ images = GitlabJanitor::ImageCleaner.new(
   deadline: Fugit::Duration.parse(@opts[:image_deadline]).to_sec
 )
 
-until $exiting
+until GitlabJanitor.exiting?
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
   images.clean(remove: @opts[:remove])

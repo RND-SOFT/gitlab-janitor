@@ -15,7 +15,7 @@ RUN set -ex \
   && apk add --no-cache docker-cli
 
 ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
-ADD lib/gitlab-janitor/version.rb /home/app/lib/gitlab-janitor/
+ADD lib/gitlab-_anitor/version.rb /home/app/lib/gitlab_janitor/
 
 RUN set -ex \
   && gem install bundler && gem update bundler \
