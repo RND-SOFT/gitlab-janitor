@@ -52,14 +52,14 @@ Usage: gitlab-janitor [options]
         --include=*units*            ENV[INCLUDE]             <List> Include container for removal.
         --exclude=*gitlab*           ENV[EXCLUDE]             <List> Exclude container from removal by name.
         --container-deadline=1h10m   ENV[CONTAINER_DEADLINE]  Maximum container run duration.
-        --volume-deadline=2d6h       ENV[VOLUME_DEADLINE]     Maximum volume life dudation.
+        --volume-include=runner*cache*
+                                     ENV[VOLUME_INCLUDE]      <List> Include volumes for removal.
+        --volume-deadline=2d6h       ENV[VOLUME_DEADLINE]     Maximum volume life duration.
         --image-deadline=20d         ENV[IMAGE_DEADLINE]      Maximum image life duration.
         --image-store=./images.txt   ENV[IMAGE_STORE]         File to store images timestamps.
         --remove                     ENV[REMOVE]              Real remove instead of dry run.
-        --docker=unix:///var/run/docker.sock
-                                     ENV[DOCKER_HOST]         Docker api endpoint.
+        --docker=unix:///tmp/mysock  ENV[DOCKER_HOST]         Docker api endpoint.
         --debug                      ENV[LOG_LEVEL]           Verbose logs. ENV values: debug, info, warn, error
-
 ```
 
 ### Удаление зависших контейнеров
@@ -74,7 +74,8 @@ Usage: gitlab-janitor [options]
 
 Порядок определения вольюмов для удаления:
 
-- на удаление попадают только вольюмы, не являющиеся именованными;
+- на удаление попадают вольюмы, не являющиеся именованными;
+- `volume-include=[runner*cache*]`- дополнительные волюмы для удаления;
 - `volume-deadline=[2d6h]` - результирующий список проверяется на длительность существования вольюма;
 
 ### Удаление образов
