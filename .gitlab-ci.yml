@@ -27,8 +27,13 @@ build:
   stage: build
   script:
     - SERVICE_TAG=lastest docker-compose pull -q || true
+    - export TAG=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+    - echo "TAG=${TAG} > version.env"
     - docker-compose build --force-rm --pull
     - docker-compose push
+  artifacts:
+    reports:
+      dotenv: version.env   
 
 # TAGGING STAGE
 
@@ -50,7 +55,9 @@ tagging:master:
 tagging:version:
   extends: .tagging
   before_script:
-    - export TAG=`cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+'`
+    - env
+    - echo $TAG
+    - cat version.env || true
   only:
     - master    
 
