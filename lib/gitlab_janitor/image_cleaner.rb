@@ -1,3 +1,5 @@
+require 'open3'
+
 module GitlabJanitor
   class ImageCleaner < BaseCleaner
 
@@ -60,7 +62,7 @@ module GitlabJanitor
 
           logger.tagged(model.name) do
             logger.debug '   Removing...'
-            log_exception('Remove') { `docker rmi #{model.name}` }
+            log_exception('Remove') { out, _status = Open3.capture2e("docker rmi #{model.name}"); logger.info(out) }
             logger.debug '   Removing COMPLETED'
           end
         end

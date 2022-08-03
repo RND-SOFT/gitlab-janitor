@@ -32,6 +32,7 @@ GitlabJanitor::Util.setup
   volume_deadline:    ENV.fetch('VOLUME_DEADLINE', '2d6h'),
   image_deadline:     ENV.fetch('IMAGE_DEADLINE', '20d'),
   image_store:        ENV.fetch('IMAGE_STORE', './images.txt'),
+  cache_size:         ENV.fetch('CACHE_SIZE', '10G'),
   remove:             ENV.fetch('REMOVE', 'false').to_bool,
   log_level:          ENV.fetch('LOG_LEVEL', ::Logger::INFO),
   docker_host:        ENV.fetch('DOCKER_HOST', 'unix:///var/run/docker.sock')
@@ -76,8 +77,13 @@ parser = OptionParser.new do |o|
   end
 
   o.on("--image-store=#{@opts[:image_store]}",
-       'ENV[IMAGE_STORE]'.ljust(25) + 'File to store images timestamps.') do |pattern|
-    @opts[:image_store] = pattern.strip
+       'ENV[IMAGE_STORE]'.ljust(25) + 'File to store images timestamps.') do |value|
+    @opts[:image_store] = value.strip
+  end
+
+  o.on("--cache-size=#{@opts[:cache_size]}",
+       'ENV[CACHE_SIZE]'.ljust(25) + 'Size of docker cache to keep.') do |value|
+    @opts[:cache_size] = value.strip
   end
 
   o.on('--remove', 'ENV[REMOVE]'.ljust(25) + 'Real remove instead of dry run.') do |value|
@@ -121,12 +127,19 @@ images = GitlabJanitor::ImageCleaner.new(
   deadline:    Fugit::Duration.parse(@opts[:image_deadline]).to_sec
 )
 
+cache = GitlabJanitor::CacheCleaner.new(
+  keep_size: @opts[:cache_size],
+  delay:     Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
+  deadline:  Fugit::Duration.parse(@opts[:image_deadline]).to_sec
+)
+
 until GitlabJanitor::Util.exiting?
   File.write('/tmp/service.pid', Process.pid)
 
   containers.clean(remove: @opts[:remove])
   volumes.clean(remove: @opts[:remove])
   images.clean(remove: @opts[:remove])
+  cache.clean(remove: @opts[:remove])
 
   sleep 3
 end
