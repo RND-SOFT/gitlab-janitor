@@ -4,11 +4,14 @@
 [![Gem](https://img.shields.io/gem/dt/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor/versions)
 [![YARD](https://badgen.net/badge/YARD/doc/blue)](http://www.rubydoc.info/gems/gitlab-janitor)
 
-Gitlab Janitor это утилита для автоматической очистки зависших и прошенных ресурсов при использовании Docker в `Gitlab` CI/CD.
+[![Docker Pulls](https://badgen.net/docker/pulls/rnds/gitlab-janitor?icon=docker&label=pulls)](https://hub.docker.com/r/rnds/gitlab-janitor/)
+[![Docker Stars](https://badgen.net/docker/stars/rnds/gitlab-janitor?icon=docker&label=stars)](https://hub.docker.com/r/rnds/gitlab-janitor/)
+
+Gitlab Janitor это утилита для автоматической очистки зависших и прошенных ресурсов при использовании Docker в `Gitlab` CI/CD. Проект вдохновлён утилитой [GitLab Runner Docker Cleanup](https://gitlab.com/gitlab-org/gitlab-runner-docker-cleanup).
 
 ---
 
-GitLab Janitor is a tool to automatically manage stalled and dangling resources when using Docker in `Gitlab` CI/CD.
+GitLab Janitor is a tool to automatically manage stalled and dangling resources when using Docker in `Gitlab` CI/CD. Project inpired by [GitLab Runner Docker Cleanup](https://gitlab.com/gitlab-org/gitlab-runner-docker-cleanup).
 
 Возможности / Features
 
@@ -17,6 +20,7 @@ GitLab Janitor is a tool to automatically manage stalled and dangling resources 
 - Удаление неиспользуемых образов / Remove unused images
 - Отслеживание вререни использвоания образов / Track image usage timestamp 
 - Очистка кешей Docker (build cache) / Cleanup docker build cache
+- Готовый [docker-образ](https://hub.docker.com/r/rnds/gitlab-janitor) / Production ready [docker image](https://hub.docker.com/r/rnds/gitlab-janitor)
 
 ## Установка / Installation
 
@@ -34,11 +38,11 @@ If you'd rather install `Gitlab Janitor` using bundler, add a line for it in you
 gem 'rubocop', require: false
 ```
 
-Для установки с помощью docker контейнера скачайте образ:
+Для установки с помощью docker контейнера [скачайте образ](https://hub.docker.com/r/rnds/gitlab-janitor):
 
 ---
 
-To install as docker container just pull the image:
+To install as docker container just [pull the image](https://hub.docker.com/r/rnds/gitlab-janitor):
 
 
 ```sh
@@ -63,7 +67,7 @@ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock rnds/gitlab-janitor
 
 Commain line options, environment variables and default values:
 
-```bash
+```sh
 $ gitlab-janitor --help
 
 Usage: gitlab-janitor [options] 
@@ -140,13 +144,13 @@ Images deleted when:
 
 Конфиг для продуктового режима / Production ready config:
 
-```bash
+```sh
 REMOVE=true INCLUDE="*integr*, *units*" EXCLUDE="*gitlab*" CONTAINER_DEADLINE="1h10m" VOLUME_DEADLINE="3d" IMAGE_DEADLINE="20d" gitlab-janitor
 ```
 
 ## Запуск в докере / Running in docker
 
-```bash
+```sh
 docker run --rm \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e REMOVE=true \

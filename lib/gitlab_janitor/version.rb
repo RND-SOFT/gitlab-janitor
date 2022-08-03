@@ -1,6 +1,6 @@
 module GitlabJanitor
 
-  VERSION = '0.0.3'.freeze
+  VERSION = '1.0.1'.freeze
 
 end
 
