@@ -48,13 +48,13 @@ tagging:master:
     IMAGE: ${SERVICE_IMAGE}
 
 tagging:version:
-  extends: .tagging_master  
+  extends: .tagging
   variables:
     IMAGE: ${SERVICE_IMAGE}
   before_script:
     - export TAG=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
     - echo "TAG=${TAG}" > .env.tagging
-
-
+  only:
+    - master   
 
 
