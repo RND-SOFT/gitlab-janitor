@@ -78,7 +78,7 @@ module GitlabJanitor
       end
       @logger.info("Selected volumes: \n#{to_remove.map{|c| "  + #{format_item(c)}" }.join("\n")}")
 
-      @logger.debug("Filtering volumes by deadline: older than #{@deadline} seconds...")
+      @logger.info("Filtering volumes by deadline: older than #{@deadline} seconds...")
       to_remove = select_by_deadline(to_remove)
       if to_remove.empty?
         @logger.info('Noting to remove.')

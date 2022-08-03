@@ -78,7 +78,7 @@ module GitlabJanitor
       end
       @logger.info("Filtered containers: \n#{to_remove.map{|c| "  + #{format_item(c)}" }.join("\n")}")
 
-      @logger.debug("Filtering containers by deadline: older than #{Fugit::Duration.parse(@deadline).deflate.to_plain_s}...")
+      @logger.info("Filtering containers by deadline: older than #{Fugit::Duration.parse(@deadline).deflate.to_plain_s}...")
       to_remove = select_by_deadline(to_remove)
       if to_remove.empty?
         @logger.info('Noting to remove.')
