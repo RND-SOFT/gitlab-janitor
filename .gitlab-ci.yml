@@ -70,9 +70,9 @@ deploy:dockerhub:
     - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
     - docker pull ${SERVICE_IMAGE}:latest
     - docker tag ${SERVICE_IMAGE}:latest rnds/gitlab-janitor:latest
-    - docekr push rnds/gitlab-janitor:latest
+    - docker push rnds/gitlab-janitor:latest
     - docker pull ${SERVICE_IMAGE}:${VERSION}
     - docker tag ${SERVICE_IMAGE}:${VERSION} rnds/gitlab-janitor:${VERSION}
-    - docekr push rnds/gitlab-janitor:${VERSION}
+    - docker push rnds/gitlab-janitor:${VERSION}
   only:
     - master   
