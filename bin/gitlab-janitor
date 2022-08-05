@@ -24,13 +24,13 @@ UTIL = File.basename(__FILE__)
 GitlabJanitor::Util.setup
 
 @opts = {
-  includes:           [ENV.fetch('INCLUDE', '*units*')],
-  excludes:           [ENV.fetch('EXCLUDE', '*gitlab*')],
-  clean_delay:        ENV.fetch('CLEAN_DELAY', '30m'),
+  includes:           [ENV.fetch('INCLUDE', '*units*').split(/[,;]/)].flatten.compact,
+  excludes:           [ENV.fetch('EXCLUDE', '*gitlab*').split(/[,;]/)].flatten.compact,
+  clean_delay:        ENV.fetch('CLEAN_DELAY', '10m'),
   container_deadline: ENV.fetch('CONTAINER_DEADLINE', '1h10m'),
-  volume_includes:    [ENV.fetch('IMAGE_INCLUDE', 'runner*cache*')],
-  volume_deadline:    ENV.fetch('VOLUME_DEADLINE', '2d6h'),
-  image_deadline:     ENV.fetch('IMAGE_DEADLINE', '20d'),
+  volume_includes:    [ENV.fetch('IMAGE_INCLUDE', 'runner*cache*').split(/[,;]/)].flatten.compact,
+  volume_deadline:    ENV.fetch('VOLUME_DEADLINE', '3d'),
+  image_deadline:     ENV.fetch('IMAGE_DEADLINE', '14d'),
   image_store:        ENV.fetch('IMAGE_STORE', './images.txt'),
   cache_size:         ENV.fetch('CACHE_SIZE', '10G'),
   remove:             ENV.fetch('REMOVE', 'false').to_bool,
