@@ -33,6 +33,26 @@ RUN set -ex \
   && bundle clean --force \
   && rm -rf /tmp/* /var/tmp/* /usr/src/ruby /root/.gem /usr/local/bundle/cache
 
+ARG \
+  CREATED="2022-08-05 15:22:36+03:00" \
+  VERSION="unknown" \
+  REVISION="unknown" \
+  REFNAME="unknown"
+
+LABEL \
+  org.opencontainers.image.created="${CREATED}" \
+  org.opencontainers.image.authors="Samoylenko Yuri <kinnalru@yandex.ru>" \
+  org.opencontainers.image.url="https://github.com/RND-SOFT/gitlab-janitor" \
+  org.opencontainers.image.documentation="https://github.com/RND-SOFT/gitlab-janitor" \
+  org.opencontainers.image.source="https://github.com/RND-SOFT/gitlab-janitor" \
+  org.opencontainers.image.version="${VERSION}" \
+  org.opencontainers.image.revision="${REVISION}" \
+  org.opencontainers.image.vendor="RNDSOFT" \
+  org.opencontainers.image.licenses="MIT" \
+  org.opencontainers.image.ref.name="${REFNAME}" \
+  org.opencontainers.image.title="GitLab Janitor is a tool to automatically manage stalled and dangling resources when using Docker in Gitlab CI/CD" \
+  org.opencontainers.image.description="GitLab Janitor is a tool to automatically manage stalled and dangling resources when using Docker in Gitlab CI/CD"
+
 CMD ["bundle", "exec", "bin/gitlab-janitor"]
 
 

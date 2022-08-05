@@ -9,6 +9,10 @@ services:
       context: .
       args:
         RUBY_VERSION: 3.1
+        CREATED:  ${OC_IMAGE_CREATED-2022-08-05 15:22:36+03:00}
+        VERSION:  ${OC_IMAGE_VERSION-unknown}
+        REVISION: ${OC_IMAGE_REVISION-unknown}
+        REFNAME:  ${OC_IMAGE_REFNAME-unknown}
     image: ${SERVICE_IMAGE-rnds/gitlab-janitor}:${SERVICE_TAG-latest}
     working_dir: /home/app
     tmpfs: /tmp

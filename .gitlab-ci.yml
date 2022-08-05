@@ -26,6 +26,12 @@ build:
   image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
   stage: build
   script:
+    - export OC_IMAGE_CREATED=${date --rfc-3339=seconds}
+    - export OC_IMAGE_VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+    - export OC_IMAGE_REVISION=${CI_COMMIT_SHORT_SHA}
+    - test -n "${CI_COMMIT_REF_SLUG}" && export OC_IMAGE_REFNAME=${CI_COMMIT_REF_SLUG} 
+    - test -n "${CI_COMMIT_TAG}" && export OC_IMAGE_REFNAME=${CI_COMMIT_TAG} 
+    - docker-compose pull -q || true
     - SERVICE_TAG=lastest docker-compose pull -q || true
     - docker-compose build --force-rm --pull
     - docker-compose push
@@ -52,9 +58,23 @@ tagging:version:
   variables:
     IMAGE: ${SERVICE_IMAGE}
   before_script:
-    - export TAG=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
-    - echo "TAG=${TAG}" > .env.tagging
+    - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+    - echo "TAG=${VERSION}" > .env.tagging
   only:
     - master   
 
-
+deploy:dockerhub:
+  #image: rnds/gitlab-runner:latest
+  extends: 
+    - .runner-image 
+  stage: deploy
+  script:
+    - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+    - docker pull ${SERVICE_IMAGE}:latest
+    - docker tag ${SERVICE_IMAGE}:latest rnds/gitlab-janitor:latest
+    - docekr push rnds/gitlab-janitor:latest
+    - docker pull ${SERVICE_IMAGE}:${VERSION}
+    - docker tag ${SERVICE_IMAGE}:${VERSION} rnds/gitlab-janitor:${VERSION}
+    - docekr push rnds/gitlab-janitor:${VERSION}
+  only:
+    - master   
