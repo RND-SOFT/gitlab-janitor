@@ -64,9 +64,7 @@ tagging:version:
     - master   
 
 deploy:dockerhub:
-  #image: rnds/gitlab-runner:latest
-  extends: 
-    - .runner-image 
+  image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
   stage: deploy
   script:
     - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
