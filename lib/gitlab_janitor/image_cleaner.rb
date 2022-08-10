@@ -66,6 +66,9 @@ module GitlabJanitor
             logger.debug '   Removing COMPLETED'
           end
         end
+
+        out, _status = Open3.capture2e("docker image prune -f")
+        logger.info(out)
       else
         logger.info 'Skip removal due to dry run'
       end
