@@ -35,7 +35,8 @@ GitlabJanitor::Util.setup
   cache_size:         ENV.fetch('CACHE_SIZE', '10G'),
   remove:             ENV.fetch('REMOVE', 'false').to_bool,
   log_level:          ENV.fetch('LOG_LEVEL', ::Logger::INFO),
-  docker_host:        ENV.fetch('DOCKER_HOST', 'unix:///var/run/docker.sock')
+  docker_host:        ENV.fetch('DOCKER_HOST', 'unix:///var/run/docker.sock'),
+  redis_url:          ENV.fetch('REDIS_URL', 'redis://127.0.0.1:6379/0')
 }
 
 parser = OptionParser.new do |o|
@@ -90,8 +91,12 @@ parser = OptionParser.new do |o|
     @opts[:remove] = value.strip.to_bool
   end
 
-  o.on("--docker=#{@opts[:docker_host]}", 'ENV[DOCKER_HOST]'.ljust(25) + 'Docker api endpoint.') do |_url|
-    @opts[:docker_host] = value.strip
+  o.on("--docker=#{@opts[:docker_host]}", 'ENV[DOCKER_HOST]'.ljust(25) + 'Docker api endpoint.') do |url|
+    @opts[:docker_host] = url.strip
+  end
+
+  o.on("--redis=#{@opts[:redis_url]}", 'ENV[REDIS_URL]'.ljust(25) + 'Redis endpoint.') do |url|
+    @opts[:redis_url] = url.strip
   end
 
   o.on('--debug', 'ENV[LOG_LEVEL]'.ljust(25) + 'Verbose logs. ENV values: debug, info, warn, error') do
@@ -123,6 +128,7 @@ volumes = GitlabJanitor::VolumeCleaner.new(
 
 images = GitlabJanitor::ImageCleaner.new(
   image_store: File.expand_path(@opts[:image_store]),
+  redis:       @opts[:redis_url],
   delay:       Fugit::Duration.parse(@opts[:clean_delay]).to_sec,
   deadline:    Fugit::Duration.parse(@opts[:image_deadline]).to_sec
 )

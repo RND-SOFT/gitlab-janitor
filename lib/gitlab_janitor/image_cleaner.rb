@@ -1,4 +1,5 @@
 require 'open3'
+require 'redis'
 
 module GitlabJanitor
   class ImageCleaner < BaseCleaner
@@ -41,13 +42,18 @@ module GitlabJanitor
 
     attr_reader :store
 
-    def initialize(image_store:, **kwargs)
+    def initialize(image_store:, redis: nil, redis_list: 'gitlab-janitor:images_force_clean', **kwargs)
       super(**kwargs)
       @store = Store.new(filename: image_store, logger: logger)
+      @redis_url = redis
+      @redis_list = redis_list
     end
 
     def do_clean(remove: false)
       store.load
+
+      force_clean(remove: remove)
+
       to_remove, keep = prepare(store.parse_images)
       store.save(skip_older: Time.now - @deadline)
 
@@ -101,6 +107,31 @@ module GitlabJanitor
       images.select do |model|
         model.age > deadline
       end
+    end
+
+    def force_clean(remove: false)
+      return if @redis_url.nil?
+
+      redis = Redis.new(url: @redis_url)
+      redis.ltrim(@redis_list, 0, 10)
+      now = Time.now
+      redis.lrange(@redis_list, 0, -1).each do |pair|
+        image, ts = pair.split('|')
+        if (now - Time.at(ts.to_i)) > 10.seconds
+          if remove
+            logger.info("Force clean #{image}")
+            log_exception('Remove') { out, _status = Open3.capture2e("docker rmi #{image}"); logger.info(out) }
+          else
+            logger.info("Skip Force clean #{image} due to dry run")
+          end
+        else
+          logger.info("Delay force clean #{image} by time")
+        end
+      rescue StandardError => e
+        logger.error("Error from force line: '#{pair}': #{e.inspect}")
+      end
+    rescue StandardError => e
+      logger.error("Unable to retrieve data from redis: #{e}")
     end
 
   end

@@ -6,6 +6,7 @@ PATH
       docker-api
       fugit
       optparse
+      redis
       tzinfo-data
 
 GEM
@@ -38,6 +39,7 @@ GEM
     optparse (0.2.0)
     raabro (1.4.0)
     rake (13.0.6)
+    redis (4.7.1)
     rspec (3.11.0)
       rspec-core (~> 3.11.0)
       rspec-expectations (~> 3.11.0)

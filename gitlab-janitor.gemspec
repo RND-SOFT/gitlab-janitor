@@ -29,6 +29,7 @@ Gem::Specification.new 'gitlab-janitor' do |spec|
   spec.add_runtime_dependency 'activesupport', '~> 6.0'
   spec.add_runtime_dependency 'docker-api'
   spec.add_runtime_dependency 'fugit'
+  spec.add_runtime_dependency 'redis'
   spec.add_runtime_dependency 'optparse'
   spec.add_runtime_dependency 'tzinfo-data'
 end
