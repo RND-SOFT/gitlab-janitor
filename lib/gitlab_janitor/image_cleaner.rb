@@ -71,6 +71,7 @@ module GitlabJanitor
       end
     ensure
       if remove
+        logger.info 'docker image prune -f'
         out, _status = Open3.capture2e("docker image prune -f")
         logger.info(out)
       end
