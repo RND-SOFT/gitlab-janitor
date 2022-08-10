@@ -111,6 +111,7 @@ module GitlabJanitor
 
     def force_clean(remove: false)
       return if @redis_url.nil?
+      logger.info("Force clean image from #{@redis_url}/#{@redis_url}...")
 
       redis = Redis.new(url: @redis_url)
       redis.ltrim(@redis_list, 0, 10)
