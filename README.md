@@ -5,9 +5,14 @@
 [![Gem Version](https://badge.fury.io/rb/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor)
 [![Gem](https://img.shields.io/gem/dt/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor/versions)
 [![YARD](https://badgen.net/badge/YARD/doc/blue)](http://www.rubydoc.info/gems/gitlab-janitor)
+[![outdated](https://lysander.rnds.pro/api/v1/badges/gitlab-janitor_outdated.svg)](https://lysander.rnds.pro/api/v1/badges/gitlab-janitor_outdated.html)
+
+
 
 [![Docker Pulls](https://badgen.net/docker/pulls/rnds/gitlab-janitor?icon=docker&label=pulls)](https://hub.docker.com/r/rnds/gitlab-janitor/)
 [![Docker Stars](https://badgen.net/docker/stars/rnds/gitlab-janitor?icon=docker&label=stars)](https://hub.docker.com/r/rnds/gitlab-janitor/)
+
+
 
 </div>
 
@@ -67,7 +72,7 @@ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock rnds/gitlab-janitor
 
 ## Документация / Documentation
 
-Параметры командной строки, переменные окружения и занчения по-умолчанию:
+Параметры командной строки, переменные окружения и значения по-умолчанию:
 
 Commain line options, environment variables and default values:
 
@@ -94,7 +99,7 @@ Usage: gitlab-janitor [options]
 
 Порядок определения контейнреов для удаления:
 
-- `include=[*units*]` - в список на удаление включаются контейнеры удовлетворябющие шаблону;
+- `include=[*units*]` - в список на удаление включаются контейнеры удовлетворяющие шаблону;
 - `exclude=[*gitlab*]` - из спсика исключаются контейнеры по шаблону;
 - `container-deadline=[1h10m]` - результирующий список проверяется на длительность запуска контенйра;
 
