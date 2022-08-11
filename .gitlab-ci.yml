@@ -15,15 +15,36 @@ variables:
 
 # MIXINS
 
+.runner:
+  image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
+
 include:
   - project: 'aggredator/support/composer'
     file: '/templates/tagging.yml'
   - project: 'aggredator/support/composer'
     file: '/templates/publish-readme-to-harbor.yml'
 
+build:gem:
+  extends: .runner
+  stage: build
+  variables:
+    BUILDVERSION: ${CI_PIPELINE_ID}
+  script:
+    - bundle install --jobs=3 --path vendor/bundle && bundle package --all
+    - gem build `ls | grep gemspec` && gem install `ls | grep -e '.gem$'` 
+  cache:
+    paths:
+      - vendor/bundle
+      - vendor/cache
+  artifacts:
+    name: "gem"
+    paths:
+      - ./*.gem
+  only:
+    - master
 
-build:
-  image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
+build:docker:
+  extends: .runner
   stage: build
   script:
     - export OC_IMAGE_CREATED=$(date --rfc-3339=seconds)
@@ -64,7 +85,7 @@ tagging:version:
     - master   
 
 deploy:dockerhub:
-  image: harbor.rnds.pro/dockerhub/rnds/gitlab-runner:latest
+  extends: .runner
   stage: deploy
   script:
     - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
@@ -76,3 +97,37 @@ deploy:dockerhub:
     - docker push rnds/gitlab-janitor:${VERSION}
   only:
     - master   
+    
+deploy:rubygems:
+  extends: .runner
+  stage: deploy
+  script:
+    - mkdir -p ~/.gem
+    - 'echo ":rubygems_api_key: ${RUBYGEMS_KEY}" > ~/.gem/credentials'
+    - chmod 600 ~/.gem/credentials
+    - export GEMFILE=`ls *.gem | tail -n 1`
+    - gem push $GEMFILE
+  only:
+    - master
+    
+deploy:badges:
+  extends: .runner
+  stage: deploy
+  allow_failure: true
+  variables:
+    BRANCH_LOCK: ci/${CI_PROJECT_NAME}/${CI_COMMIT_REF_SLUG}
+    ENV_LOCK: ci/${CI_PROJECT_NAME}/${CI_ENVIRONMENT_SLUG}
+    BADGES: https://lysander.rnds.pro/api/v1/badges/gitlab-janitor
+  script:
+    - bundle audit update
+    - bundle audit || true
+    - bundle outdated --only-explicit --no-pre --group default || true
+    - vulnerable=$(bundle audit | grep "Name:" | sort | uniq | wc -l) || true
+    - outdated=$(bundle outdated --only-explicit --no-pre --group default | grep "*" | wc -l) || true
+    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_vulnerable.json?badge[message]=$(bundle audit | grep "Name:" | sort | uniq | wc -l)%20gems" || true
+    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_outdated.json?badge[message]=$(bundle outdated --only-explicit --no-pre --group default | grep "*" | wc -l)%20gems" || true
+    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_quality.json?badge[message]=$(rubycritic -f lint lib | tail -n 1 | cut -d ' ' -f2)%25" || true
+    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_coverage.json?badge[message]=$(cat .coverage | ruby -e 'puts /\((\d+.\d+)\%\) covered/.match(STDIN.read)[1]')%25" || true
+  only: 
+    - master
+    
