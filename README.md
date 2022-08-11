@@ -5,7 +5,11 @@
 [![Gem Version](https://badge.fury.io/rb/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor)
 [![Gem](https://img.shields.io/gem/dt/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor/versions)
 [![YARD](https://badgen.net/badge/YARD/doc/blue)](http://www.rubydoc.info/gems/gitlab-janitor)
-[![outdated](https://lysander.rnds.pro/api/v1/badges/gitlab-janitor_outdated.svg)](https://lysander.rnds.pro/api/v1/badges/gitlab-janitor_outdated.html)
+
+
+[![quality](https://lysander.rnds.pro/api/v1/badges/janitor_quality.svg)](https://lysander.rnds.pro/api/v1/badges/janitor_quality.html)
+[![outdated](https://lysander.rnds.pro/api/v1/badges/janitor_outdated.svg)](https://lysander.rnds.pro/api/v1/badges/janitor_outdated.html)
+[![vulnerable](https://lysander.rnds.pro/api/v1/badges/janitor_vulnerable.svg)](https://lysander.rnds.pro/api/v1/badges/janitor_vulnerable.html)
 
 
 
