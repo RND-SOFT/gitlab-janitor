@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'gitlab_janitor/version'
 
 Gem::Specification.new 'gitlab-janitor' do |spec|
-  spec.version       = ENV['BUILDVERSION'].to_i > 0 ? "#{Lusnoc::VERSION}.#{ENV['BUILDVERSION'].to_i}" : GitlabJanitor::VERSION
+  spec.version       = ENV['BUILDVERSION'].to_i > 0 ? "#{GitlabJanitor::VERSION}.#{ENV['BUILDVERSION'].to_i}" : GitlabJanitor::VERSION
   spec.authors       = ['Samoilenko Yuri']
   spec.email         = ['kinnalru@gmail.com']
   spec.description   = spec.summary = 'GitLab Janitor is a tool to automatically manage stalled containers when using Docker.'

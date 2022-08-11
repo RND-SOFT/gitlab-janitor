@@ -1,5 +1,7 @@
 # gitlab-janitor
 
+<div align="center">
+
 [![Gem Version](https://badge.fury.io/rb/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor)
 [![Gem](https://img.shields.io/gem/dt/gitlab-janitor.svg)](https://rubygems.org/gems/gitlab-janitor/versions)
 [![YARD](https://badgen.net/badge/YARD/doc/blue)](http://www.rubydoc.info/gems/gitlab-janitor)
@@ -7,7 +9,9 @@
 [![Docker Pulls](https://badgen.net/docker/pulls/rnds/gitlab-janitor?icon=docker&label=pulls)](https://hub.docker.com/r/rnds/gitlab-janitor/)
 [![Docker Stars](https://badgen.net/docker/stars/rnds/gitlab-janitor?icon=docker&label=stars)](https://hub.docker.com/r/rnds/gitlab-janitor/)
 
-Gitlab Janitor это утилита для автоматической очистки зависших и прошенных ресурсов при использовании Docker в `Gitlab` CI/CD. Проект вдохновлён утилитой [GitLab Runner Docker Cleanup](https://gitlab.com/gitlab-org/gitlab-runner-docker-cleanup).
+</div>
+
+Gitlab Janitor это утилита для автоматической очистки зависших и брошенных ресурсов при использовании Docker в `Gitlab` CI/CD. Проект вдохновлён утилитой [GitLab Runner Docker Cleanup](https://gitlab.com/gitlab-org/gitlab-runner-docker-cleanup).
 
 ---
 
@@ -161,3 +165,7 @@ docker run --rm \
   -e IMAGE_DEADLINE="20d" \
   rnds/gitlab-janitor:latest
 ```
+
+## Лицензия / License
+
+[MIT](./LICENSE)
