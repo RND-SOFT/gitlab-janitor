@@ -118,7 +118,7 @@ deploy:badges:
   variables:
     BRANCH_LOCK: ci/${CI_PROJECT_NAME}/${CI_COMMIT_REF_SLUG}
     ENV_LOCK: ci/${CI_PROJECT_NAME}/${CI_ENVIRONMENT_SLUG}
-    BADGES: https://lysander.rnds.pro/api/v1/badges/gitlab-janitor
+    BADGES_URL: https://lysander.rnds.pro/api/v1/badges/gitlab-janitor
   cache:
     paths:
       - vendor/bundle
@@ -132,10 +132,12 @@ deploy:badges:
     - bundle outdated --only-explicit --no-pre --group default || true
     - vulnerable=$(bundle audit | grep "Name:" | sort | uniq | wc -l) || true
     - outdated=$(bundle outdated --only-explicit --no-pre --group default | grep "*" | wc -l) || true
-    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_vulnerable.json?badge\[message\]=$vulnerable%20gems" || true
-    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_outdated.json?badge\[message\]=$outdated%20gems" || true
-    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_quality.json?badge\[message\]=$(rubycritic -f lint lib | tail -n 1 | cut -d ' ' -f2)%25" || true
-    - curl -X PUT --oauth2-bearer ${BADGE_TOKEN} "${BADGES}_coverage.json?badge\[message\]=$(cat .coverage | ruby -e 'puts /\((\d+.\d+)\%\) covered/.match(STDIN.read)[1]')%25" || true
+    - quality=$(rubycritic -f lint lib | tail -n 1 | cut -d ' ' -f2) || true
+    - curl -X PUT -m 3.0 --oauth2-bearer ${BADGE_TOKEN} -H "Content-Type:application/json" -d "{\"badge\":{\"label\":\"vulnerable\", \"color\":\"red\", \"message\":\"${vulnerable} gems\", \"redirect_url\":\"${CI_PROJECT_URL}\"}}" "${BADGES_URL}_vulnerable.json" || true
+    - curl -X PUT -m 3.0 --oauth2-bearer ${BADGE_TOKEN} -H "Content-Type:application/json" -d "{\"badge\":{\"label\":\"outdated\", \"color\":\"orange\", \"message\":\"${outdated} gems\", \"redirect_url\":\"${CI_PROJECT_URL}\"}}" "${BADGES_URL}_outdated.json" || true
+    - curl -X PUT -m 3.0 --oauth2-bearer ${BADGE_TOKEN} -H "Content-Type:application/json" -d "{\"badge\":{\"label\":\"quality\", \"color\":\"lightgray\", \"message\":\"${quality}%\", \"redirect_url\":\"${CI_PROJECT_URL}\"}}" "${BADGES_URL}_quality.json" || true
+
+
   only: 
     - master
     
