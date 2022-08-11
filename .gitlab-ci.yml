@@ -119,7 +119,14 @@ deploy:badges:
     BRANCH_LOCK: ci/${CI_PROJECT_NAME}/${CI_COMMIT_REF_SLUG}
     ENV_LOCK: ci/${CI_PROJECT_NAME}/${CI_ENVIRONMENT_SLUG}
     BADGES: https://lysander.rnds.pro/api/v1/badges/gitlab-janitor
+  cache:
+    paths:
+      - vendor/bundle
+      - vendor/cache
+    policy: pull
   script:
+    - bundle config set --local path 'vendor/bundle'
+    - bundle install --jobs=3
     - bundle audit update
     - bundle audit || true
     - bundle outdated --only-explicit --no-pre --group default || true
