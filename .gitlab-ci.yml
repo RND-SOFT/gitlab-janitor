@@ -78,7 +78,7 @@ tagging:master:
 tagging:version:
   extends: .tagging
   variables:
-    IMAGE: ${SERVICE_IMAGE}
+    IMAGE: ${SERVICE_IMAGE} 
   before_script:
     - export VERSION=$(cat lib/gitlab_janitor/version.rb | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
     - echo "TAG=${VERSION}" > .env.tagging
