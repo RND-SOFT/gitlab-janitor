@@ -1,4 +1,4 @@
-before_script:
+before_script: 
     - mkdir -p ~/.docker
     - echo ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
 
