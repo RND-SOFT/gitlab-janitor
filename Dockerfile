@@ -11,9 +11,14 @@ RUN mkdir -p /usr/local/etc \
   } >> /usr/local/etc/gemrc \
   && echo 'gem: --no-document' > ~/.gemrc
 
+ENV \
+  BUILDKIT_INLINE_CACHE="1" \
+  BUILDKIT_PROGRESS="plain" \
+  DOCKER_BUILDKIT="1" \
+  DOCKER_CLI_EXPERIMENTAL="1" 
+
 RUN set -ex \
   && apk add --no-cache docker-cli
-
 
 ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
 ADD lib/gitlab_janitor/version.rb /home/app/lib/gitlab_janitor/
