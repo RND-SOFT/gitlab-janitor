@@ -114,7 +114,7 @@ module GitlabJanitor
       logger.info("Force clean image from #{@redis_url}/#{@redis_url}...")
 
       redis = Redis.new(url: @redis_url)
-      redis.ltrim(@redis_list, 0, 10)
+      redis.ltrim(@redis_list, 0, 100)
       now = Time.now
       redis.lrange(@redis_list, 0, -1).each do |pair|
         image, ts = pair.split('|')
