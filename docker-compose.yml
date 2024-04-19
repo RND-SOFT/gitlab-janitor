@@ -8,7 +8,7 @@ services:
     build:
       context: .
       args:
-        RUBY_VERSION: 3.1
+        RUBY_VERSION: 3.2
         CREATED:  ${OC_IMAGE_CREATED-2022-08-05 15:22:36+03:00}
         VERSION:  ${OC_IMAGE_VERSION-unknown}
         REVISION: ${OC_IMAGE_REVISION-unknown}

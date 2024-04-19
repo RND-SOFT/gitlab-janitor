@@ -18,7 +18,7 @@ ENV \
   DOCKER_CLI_EXPERIMENTAL="1" 
 
 RUN set -ex \
-  && apk add --no-cache docker-cli
+  && apk add --no-cache docker-cli docker-cli-buildx
 
 ADD Gemfile Gemfile.lock gitlab-janitor.gemspec /home/app/
 ADD lib/gitlab_janitor/version.rb /home/app/lib/gitlab_janitor/
